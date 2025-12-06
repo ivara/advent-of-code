@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"math/big"
 	"sort"
 	"strconv"
@@ -102,7 +101,7 @@ func part2(input []byte) int {
 		}
 	}
 	merged = append(merged, current)
-	fmt.Printf("Merged: %v", merged)
+	// fmt.Printf("Merged: %v", merged)
 	// 3. Count distinct integers
 	var total int
 	for _, m := range merged {
@@ -112,6 +111,6 @@ func part2(input []byte) int {
 		total += int(1 + m.End - m.Start)
 	}
 
-	fmt.Println("Number of distinct integers:", total)
+	// fmt.Println("Number of distinct integers:", total)
 	return total
 }
