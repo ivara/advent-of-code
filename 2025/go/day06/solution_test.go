@@ -25,7 +25,7 @@ func TestPart2(t *testing.T) {
   6 98  215 314
 *   +   *   + `)
 	got := part2(input)
-	want := 14
+	want := 3263827
 
 	if got != want {
 		t.Errorf("Got = %v; want %v", got, want)

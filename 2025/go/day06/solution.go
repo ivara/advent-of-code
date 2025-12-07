@@ -42,33 +42,6 @@ func part1(input []byte) int {
 	return sum
 }
 
-// w = width (column)
-// h = height (lines)
-func isBlankColumn(lines []byte, column, h int) bool {
-	for i := 0; i < h; i++ {
-		if lines[i][column] != []byte{' '} {
-			return false
-		}
-	}
-	return true
-}
-
-func multiply(numbers []int) {
-	sum := 0
-	for _, n := range numbers {
-		sum *= n
-	}
-	return sum
-}
-
-func add(numbers []int) {
-	sum := 0
-	for _, n := range numbers {
-		sum += n
-	}
-	return sum
-}
-
 func part2(input []byte) int {
 	sum := 0
 	lines := bytes.Split(input, []byte{'\n'})
@@ -76,44 +49,78 @@ func part2(input []byte) int {
 	width := len(lines[0])
 	height := len(lines)
 
-	currentNumbers := []int
-	currentOperator := "*"
+	var currentNumbers []int
+	currentOperator := ""
 
 	// Loop over all columns, and for each column
 	// Walk the lines to build numbers
-	for c := 0; c < width; c++ { // Columns
-		// the number we are currently building for this colum
-		var currentNumber []byte
-		for h := 0; h < height; h++ { // Lines
-			if isBlankLine(lines, c, h) {
-				// this means "current block" is done
-				switch currentOperator {
-				case "*":
-					sum += multiply(currentNumbers)
-					break
-				case "+":
-					sum += add(currentNumbers)
-					break
-				}
-
-				// clear things up for next block
-				currentOperator := ""
-				currentNumbers = nil
-			} else {
-				// build a number!
-				if operator == "" {
-					// Oh noes! no operator, that means it is in this
-					operator = lines[height-1][c]
-				}
-				number := getNumberFromColumn(lines, c)
-				currentNumbers = append(currentNumbers, number)
+	for columnIdx := range width { // Columns
+		if isBlankColumn(lines, columnIdx) {
+			// this means "current block" is done
+			switch currentOperator {
+			case "*":
+				sum += multiply(currentNumbers)
+			case "+":
+				sum += add(currentNumbers)
 			}
+
+			// clear things up for next block
+			currentOperator = ""
+			currentNumbers = nil
+		} else {
+			if currentOperator == "" {
+				// Oh noes! no operator, that means it is in this
+				currentOperator = string(lines[height-1][columnIdx])
+			}
+			number := getNumberFromColumn(lines, columnIdx)
+			currentNumbers = append(currentNumbers, number)
 		}
+	}
+
+	switch currentOperator {
+	case "*":
+		sum += multiply(currentNumbers)
+	case "+":
+		sum += add(currentNumbers)
 	}
 
 	return sum
 }
 
-func getNumberFromColumn(lines []byte, column c) int {
-	return 0
+func getNumberFromColumn(lines [][]byte, columnIdx int) int {
+	var bytes []byte
+	// last byte is blank or operand
+	stop := len(lines) - 1
+	for i := range stop {
+		if lines[i][columnIdx] != ' ' {
+			bytes = append(bytes, lines[i][columnIdx])
+		}
+	}
+	number, _ := strconv.Atoi(string(bytes))
+	return number
+}
+
+func isBlankColumn(lines [][]byte, columnIdx int) bool {
+	for i := range lines {
+		if lines[i][columnIdx] != ' ' {
+			return false
+		}
+	}
+	return true
+}
+
+func multiply(numbers []int) int {
+	sum := 1
+	for _, n := range numbers {
+		sum *= n
+	}
+	return sum
+}
+
+func add(numbers []int) int {
+	sum := 0
+	for _, n := range numbers {
+		sum += n
+	}
+	return sum
 }
