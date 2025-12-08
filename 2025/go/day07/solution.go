@@ -84,29 +84,31 @@ func getBeamsFromMapV2(m map[int]int) []int {
 }
 
 func part2(input []byte) int {
+	sum := 0
 	lines := bytes.Split(input, []byte{'\n'})
-
-	currentBeams := make([]int, 0, 2000)
+	maxRows := len(lines)
+	startingColumn := 0
 	// Find initial beam (S)
 	for i := 0; i < len(lines[0]); i++ {
 		if lines[0][i] == 'S' {
-			currentBeams = append(currentBeams, i)
+			startingColumn = i
 			break
 		}
 	}
 
+	sum = score(lines, maxRows, 0, startingColumn)
 	// Start working the field!
-	for i := 1; i < len(lines); i++ {
-		tmp := make([]int, 0, 1000)
-		for _, col := range currentBeams {
-			if lines[i][col] == '^' {
-				tmp = append(tmp, col-1, col+1)
-			} else {
-				tmp = append(tmp, col)
-			}
-		}
-		currentBeams = tmp
-	}
+	// for i := 1; i < len(lines); i++ {
+	// 	tmp := make([]int, 0, 1000)
+	// 	for _, col := range currentBeams {
+	// 		if lines[i][col] == '^' {
+	// 			tmp = append(tmp, col-1, col+1)
+	// 		} else {
+	// 			tmp = append(tmp, col)
+	// 		}
+	// 	}
+	// 	currentBeams = tmp
+	// }
 
 	// Get sum "current beams"
 	// sum := 0
@@ -115,7 +117,23 @@ func part2(input []byte) int {
 	// 		sum += v
 	// 	}
 	// }
-	return len(currentBeams)
+	return sum
+}
+
+// How to handle split that goes off grid? (left/right)
+func score(grid [][]byte, mr, r, c int) int {
+	// next row
+	nr := r + 1
+
+	// mr = max rows (height of grid)
+	if nr == mr {
+		return 1
+	}
+	if grid[nr][c] == '^' {
+		return score(grid, mr, nr, c-1) + score(grid, mr, nr, c+1)
+	} else {
+		return score(grid, mr, nr, c)
+	}
 }
 
 func part2gpt(input []byte) int {
