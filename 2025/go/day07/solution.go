@@ -141,3 +141,45 @@ func score(grid [][]byte, mr, r, c int) int {
 		return score(grid, mr, nr, c)
 	}
 }
+
+func part2beta(input []byte) int {
+	lines := bytes.Split(input, []byte{'\n'})
+	beamsMap := make(map[int]int)
+
+	// Find initial beam (S)
+	for i := 0; i < len(lines[0]); i++ {
+		if lines[0][i] == 'S' {
+			beamsMap[i] = 1
+			break
+		}
+	}
+
+	// Start working the field!
+	for i := 1; i < len(lines); i++ {
+		// See if there is a splitter on current paths
+		// bIdx is the value of a column where the beam is currently travelling
+
+		beamsCopy := getBeamsFromMapV2(beamsMap) // make sure to get rid of this!
+		for j := range beamsCopy {
+			if lines[i][beamsCopy[j]] == '^' {
+				// If we hit a splitter in part 2
+				// continue left, but also start a new instance going right
+				// remove current beam
+				beamsMap[beamsCopy[j]] -= 1
+				beamsMap[beamsCopy[j]-1] += 1
+				beamsMap[beamsCopy[j]+1] += 1
+			} else {
+
+			}
+		}
+	}
+
+	// Get sum "current beams"
+	sum := 0
+	for _, v := range beamsMap {
+		if v > 0 {
+			sum += v
+		}
+	}
+	return sum
+}

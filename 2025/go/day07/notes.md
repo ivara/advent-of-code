@@ -15,3 +15,8 @@ I've tried several easy approaches to this problem but they time out due to unde
 
 The memoize I did will not work if using goroutines to paralellize.
 Would need some kind of lock, "sync.Mutex" perhaps
+
+---
+
+Check Johans part2, really clean. No memoize.
+I did something similar with weights, but copied the board in every loop - very costly
