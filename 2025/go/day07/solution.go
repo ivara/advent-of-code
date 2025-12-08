@@ -84,7 +84,7 @@ func getBeamsFromMapV2(m map[int]int) []int {
 }
 
 func part2(input []byte) int {
-	sum := 0
+	// sum := 0
 	lines := bytes.Split(input, []byte{'\n'})
 	maxRows := len(lines)
 	startingColumn := 0
@@ -96,31 +96,37 @@ func part2(input []byte) int {
 		}
 	}
 
-	sum = score(lines, maxRows, 0, startingColumn)
-	// Start working the field!
-	// for i := 1; i < len(lines); i++ {
-	// 	tmp := make([]int, 0, 1000)
-	// 	for _, col := range currentBeams {
-	// 		if lines[i][col] == '^' {
-	// 			tmp = append(tmp, col-1, col+1)
-	// 		} else {
-	// 			tmp = append(tmp, col)
-	// 		}
-	// 	}
-	// 	currentBeams = tmp
-	// }
-
-	// Get sum "current beams"
-	// sum := 0
-	// for _, v := range beamsMap {
-	// 	if v > 0 {
-	// 		sum += v
-	// 	}
-	// }
-	return sum
+	// Initialize cache
+	cache := make(map[[2]int]int)
+	return scoreMemoized(lines, maxRows, 1, startingColumn, cache)
 }
 
-// How to handle split that goes off grid? (left/right)
+func scoreMemoized(grid [][]byte, mr, r, c int, cache map[[2]int]int) int {
+	// Create cache key
+	key := [2]int{r, c}
+
+	// Check if result already computed
+	if result, exists := cache[key]; exists {
+		return result
+	}
+
+	// Compute result
+	nr := r + 1
+	var result int
+
+	if nr == mr {
+		result = 1
+	} else if grid[nr][c] == '^' {
+		result = scoreMemoized(grid, mr, nr, c-1, cache) + scoreMemoized(grid, mr, nr, c+1, cache)
+	} else {
+		result = scoreMemoized(grid, mr, nr, c, cache)
+	}
+
+	// Store in cache and return
+	cache[key] = result
+	return result
+}
+
 func score(grid [][]byte, mr, r, c int) int {
 	// next row
 	nr := r + 1
@@ -134,52 +140,4 @@ func score(grid [][]byte, mr, r, c int) int {
 	} else {
 		return score(grid, mr, nr, c)
 	}
-}
-
-func part2gpt(input []byte) int {
-	lines := bytes.Split(input, []byte{'\n'})
-
-	// Find initial beam (S)
-	startCol := 0
-	for i := 0; i < len(lines[0]); i++ {
-		if lines[0][i] == 'S' {
-			startCol = i
-			break
-		}
-	}
-
-	// Count all paths using BFS/queue approach
-	type Beam struct {
-		row int
-		col int
-	}
-
-	queue := []Beam{{row: 0, col: startCol}}
-	pathCount := 0
-
-	for len(queue) > 0 {
-		beam := queue[0]
-		queue = queue[1:]
-
-		// Move beam down until it hits bottom or a splitter
-		for beam.row < len(lines)-1 {
-			beam.row++
-
-			// Check if we hit a splitter
-			if lines[beam.row][beam.col] == '^' {
-				// Split into left and right
-				leftBeam := Beam{row: beam.row, col: beam.col - 1}
-				rightBeam := Beam{row: beam.row, col: beam.col + 1}
-				queue = append(queue, leftBeam, rightBeam)
-				break // This beam path ends here (it split)
-			}
-		}
-
-		// If we reached the bottom without splitting, count this path
-		if beam.row == len(lines)-1 {
-			pathCount++
-		}
-	}
-
-	return pathCount
 }
