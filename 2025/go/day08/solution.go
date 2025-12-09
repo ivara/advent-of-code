@@ -10,22 +10,16 @@ import (
 // Holds list of "index" from the input lines
 // for which point is in this circuit
 type Circuit []int
+type Vec3 [3]float64
+type Distance struct {
+	i, j     int
+	dist     float64
+	iv3, jv3 Vec3
+}
 
 func (c *Circuit) Contains(p int) bool {
-	for _, item := range *c {
-		if item == p {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(*c, p)
 }
-
-type Distance struct {
-	i, j int
-	dist float64
-}
-
-type Vec3 [3]float64
 
 func dist(a, b Vec3) float64 {
 	dx, dy, dz := a[0]-b[0], a[1]-b[1], a[2]-b[2]
@@ -33,13 +27,22 @@ func dist(a, b Vec3) float64 {
 	return math.Sqrt(dx*dx + dy*dy + dz*dz)
 }
 
-func allPairDistances(points []Vec3) []Distance {
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func shortestPairDistances(points []Vec3, cap int) []Distance {
 	n := len(points)
 	if n < 2 {
 		return nil
 	}
 
-	dists := make([]Distance, 0, n*(n-1)/2)
+	// Optimization: Create MinHeap with cap size
+	size := Min(cap, n*(n-1)/2)
+	dists := make([]Distance, 0, size)
 
 	for i := 0; i < n-1; i++ {
 		for j := i + 1; j < n; j++ {
@@ -47,11 +50,24 @@ func allPairDistances(points []Vec3) []Distance {
 				dist: dist(points[i], points[j]),
 				i:    i,
 				j:    j,
+				iv3:  points[i],
+				jv3:  points[j],
 			}
 			dists = append(dists, d)
 		}
 	}
-	return dists
+
+	// Sort on lowest distance
+	slices.SortFunc(dists, func(a, b Distance) int {
+		if a.dist < b.dist {
+			return -1
+		} else if a.dist > b.dist {
+			return 1
+		}
+		return 0
+	})
+
+	return dists[:cap]
 }
 
 func parsePoints(b []byte) []Vec3 {
@@ -71,11 +87,11 @@ func parsePoints(b []byte) []Vec3 {
 }
 
 func createCircuits(distances []Distance) []Circuit {
-	initialCircuit := Circuit{distances[0].i, distances[0].j}
-	circuits := []Circuit{initialCircuit}
+	// initialCircuit := Circuit{distances[0].i, distances[0].j}
+	circuits := []Circuit{}
 
 outer:
-	for _, d := range distances[1:] {
+	for _, d := range distances {
 		// if len(circuits) >= cap {
 		// 	fmt.Printf("Finished creating circuits after investigating %d distances\n", i)
 		// 	break
@@ -97,28 +113,21 @@ outer:
 	return circuits
 }
 
-func part1(input []byte) int {
+// 2548 too low (real data)
+func part1(input []byte, cap int) int {
 	sum := 0
 
 	// Get the points
 	points := parsePoints(input)
-	distances := allPairDistances(points)
-	// Sort on lowest distance
-	slices.SortFunc(distances, func(a, b Distance) int {
-		if a.dist < b.dist {
-			return -1
-		} else if a.dist > b.dist {
-			return 1
-		}
-		return 0
-	})
-	circuits := createCircuits(distances[:10])
+	distances := shortestPairDistances(points, cap)
 
-	// sort circuits
+	circuits := createCircuits(distances)
+
+	// sort circuits descending
 	slices.SortFunc(circuits, func(a, b Circuit) int {
-		if len(a) < len(b) {
+		if len(a) > len(b) {
 			return -1
-		} else if len(a) > len(b) {
+		} else if len(a) < len(b) {
 			return 1
 		}
 		return 0

@@ -11,7 +11,7 @@ func main() {
 	input := readFileContents("input.txt")
 
 	startTime := time.Now()
-	result := part1(input)
+	result := part1(input, 1001)
 	part1time := float64(time.Since(startTime).Microseconds()) / 1000
 
 	startTime = time.Now()

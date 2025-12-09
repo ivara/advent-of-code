@@ -54,7 +54,17 @@ func TestPart1(t *testing.T) {
 862,61,35
 984,92,344
 425,690,689`)
-	got := part1(input)
+	got := part1(input, 10)
+	want := 40
+
+	if got != want {
+		t.Errorf("Got = %v; want %v", got, want)
+	}
+}
+
+func TestPart1RealData(t *testing.T) {
+	input := readFileContents("input.txt")
+	got := part1(input, 1001)
 	want := 40
 
 	if got != want {
@@ -119,7 +129,7 @@ func BenchmarkPart1TestData(b *testing.B) {
 425,690,689`)
 
 	for b.Loop() {
-		part1(input)
+		part1(input, 10)
 	}
 }
 
@@ -157,7 +167,7 @@ func BenchmarkPart1RealData(b *testing.B) {
 	}
 
 	for b.Loop() {
-		part1(data)
+		part1(data, 1000)
 	}
 }
 
