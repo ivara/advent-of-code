@@ -6,6 +6,33 @@ import (
 	"testing"
 )
 
+// func TestCircuitContains(t *testing.T) {
+// 	c := Circuit{1, 2, 3}
+
+//		if !c.Contains(1) {
+//			t.Errorf("Circuit contains number!")
+//		}
+//	}
+func TestCircuitContains(t *testing.T) {
+	tests := []struct {
+		name     string
+		circuit  Circuit
+		contains int
+		expected bool
+	}{
+		{"Circuit contains number 1", Circuit{1, 2, 3}, 1, true},
+		{"Circuit does not contain number 1", Circuit{2, 3}, 1, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.circuit.Contains(tt.contains)
+			if got != tt.expected {
+				t.Errorf("%v failed\n", tt.name)
+			}
+		})
+	}
+}
 func TestPart1(t *testing.T) {
 	input := []byte(`162,817,812
 57,618,57
