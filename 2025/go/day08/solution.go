@@ -87,15 +87,15 @@ func parsePoints(b []byte) []Vec3 {
 }
 
 func createCircuits(distances []Distance) []Circuit {
-	// initialCircuit := Circuit{distances[0].i, distances[0].j}
 	circuits := []Circuit{}
 
+	// TODO
+	// BUG IDENTIFIED
+	// if the current shortest distance is point A and B
+	// and A is in circuit a and B is in circuit b
+	// then circuit a and b shall be merged into one new circuit
 outer:
 	for _, d := range distances {
-		// if len(circuits) >= cap {
-		// 	fmt.Printf("Finished creating circuits after investigating %d distances\n", i)
-		// 	break
-		// }
 		for j, c := range circuits {
 			if c.Contains(d.i) && c.Contains(d.j) {
 				continue outer
@@ -120,7 +120,6 @@ func part1(input []byte, cap int) int {
 	// Get the points
 	points := parsePoints(input)
 	distances := shortestPairDistances(points, cap)
-
 	circuits := createCircuits(distances)
 
 	// sort circuits descending
